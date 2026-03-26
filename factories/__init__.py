@@ -51,6 +51,10 @@ from .circuit_factory import (
     get_composite_operator,
     get_evolution_circuit,
     get_circuit_operator,
+
+    # Bernstein Vazirani
+    get_bernstein_vazirani_oracle,
+    get_bernstein_vazirani_circuit
 )
 
 # State factory exports

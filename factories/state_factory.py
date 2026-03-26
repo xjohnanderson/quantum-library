@@ -44,3 +44,25 @@ def get_cx_statevector(label: str) -> Statevector:
 def get_cy_statevector(label: str) -> Statevector:
     # Evolves X-basis state via a CY gate (complex phase rotation). 
     return _evolve_x_basis(label, 'cy')
+
+
+def get_bv_oracle_statevector(s: str, input_label: str = "0"*len(s)) -> Statevector:
+    """
+    Bernstein Vazirani State Vector
+    Evolve the initial |+...+⟩|-> state through the BV oracle for secret s.
+    Useful for analyzing phase kickback.
+    """
+    n = len(s)
+    # Prepare |+...+⟩ on input, |-> on auxiliary
+    qc = QuantumCircuit(n + 1)
+    qc.h(range(n))
+    qc.x(n)
+    qc.h(n)
+    
+    initial_sv = Statevector.from_instruction(qc)
+    
+    # Apply oracle
+    oracle = get_bernstein_vazirani_oracle(s)
+    final_sv = initial_sv.evolve(oracle)
+    
+    return final_sv

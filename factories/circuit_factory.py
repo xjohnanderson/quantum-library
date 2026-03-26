@@ -229,3 +229,56 @@ def get_qft_circuit(n_qubits: int, do_swaps: bool = True) -> QuantumCircuit:
     )
     return qft
 """End Fourier Transform"""
+
+
+
+"""Bernstein-Vazirani"""
+def get_bernstein_vazirani_oracle(s: str) -> QuantumCircuit:
+   
+    #Creates the Bernstein-Vazirani oracle for a secret string s.
+    
+    #The oracle implements |x⟩|y⟩ → |x⟩|y ⊕ (s·x)⟩ where s·x is the dot product mod 2.
+    
+    n = len(s)
+    if not all(bit in '01' for bit in s):
+        raise ValueError("Secret string s must consist of '0's and '1's only.")
+    
+    qc = QuantumCircuit(n + 1, name=f"BV_oracle_s={s}")
+    
+    # Apply CNOT from each input qubit i to the target if s[i] == '1'
+    for i, bit in enumerate(reversed(s)):   # reversed because Qiskit uses little-endian
+        if bit == '1':
+            qc.cx(i, n)                     # control = input qubit i, target = auxiliary
+    
+    return qc.to_gate()
+
+
+
+def get_bernstein_vazirani_circuit(s: str) -> QuantumCircuit:
+     
+    #Full Bernstein-Vazirani circuit for secret string s.
+    
+    #Returns a circuit that should measure the secret string s with probability 1.
+     
+    n = len(s)
+    qc = QuantumCircuit(n + 1, n, name=f"BernsteinVazirani_s={s}")
+    
+    # 1. Initialize input register to |+...+⟩ and auxiliary to |-> 
+    qc.h(range(n))           # superposition on input qubits
+    qc.x(n)                  # auxiliary to |1⟩
+    qc.h(n)                  # auxiliary to |-> 
+    qc.barrier()
+    
+    # 2. Apply the oracle
+    oracle = get_bernstein_vazirani_oracle(s)
+    qc.append(oracle, range(n + 1))
+    qc.barrier()
+    
+    # 3. Apply Hadamard again on input register (Fourier transform back)
+    qc.h(range(n))
+    
+    # 4. Measure input register (auxiliary qubit is not measured)
+    qc.measure(range(n), range(n))
+    
+    return qc
+"""End Bernstein-Vazirani"""
