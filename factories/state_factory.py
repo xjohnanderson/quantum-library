@@ -46,23 +46,35 @@ def get_cy_statevector(label: str) -> Statevector:
     return _evolve_x_basis(label, 'cy')
 
 
-def get_bv_oracle_statevector(s: str, input_label: str = "0"*len(s)) -> Statevector:
+def get_bv_oracle_statevector(s: str, input_label: str = None) -> Statevector:
     """
     Bernstein Vazirani State Vector
     Evolve the initial |+...+⟩|-> state through the BV oracle for secret s.
     Useful for analyzing phase kickback.
+    
+    Inputs: s (str), input_label (str|None). Outputs: qiskit.quantum_info.Statevector
     """
+    # Late binding for the default label based on string length
+    if input_label is None:
+        input_label = "0" * len(s)
+        
     n = len(s)
     # Prepare |+...+⟩ on input, |-> on auxiliary
     qc = QuantumCircuit(n + 1)
+    
+    # Optional: If you want to use the input_label to set the initial state 
+    # (e.g., if input_label isn't all zeros), you'd apply X gates here.
+    
     qc.h(range(n))
     qc.x(n)
     qc.h(n)
     
     initial_sv = Statevector.from_instruction(qc)
     
-    # Apply oracle
+    # Ensure get_bernstein_vazirani_oracle is imported or defined in this scope
+    from factories.circuit_factory import get_bernstein_vazirani_oracle
     oracle = get_bernstein_vazirani_oracle(s)
+    
     final_sv = initial_sv.evolve(oracle)
     
     return final_sv
