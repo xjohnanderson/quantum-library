@@ -1,48 +1,64 @@
 # utils/visualization.py
-# This module provides flexible visualization for quantum states, operators, and circuits.
-# It automatically detects the environment to provide LaTeX, Matplotlib, or ASCII output.
+# Path: utils/visualization.py
 
-import sys
+import os
+import matplotlib.pyplot as plt
+from qiskit.visualization import plot_bloch_multivector
 
 def _can_render_latex():
-    # Function Constraints: Checks if the current environment supports IPython display.
     try:
         from IPython import get_ipython
         return get_ipython() is not None
     except ImportError:
         return False
 
-def show_quantum_object(obj, label=""):
-    # Function Constraints: Displays a Statevector, Operator, or QuantumCircuit.
-    # What it does: Renders LaTeX/MPL in Jupyter, ASCII text in Terminal.
-    # Inputs: obj (Statevector/Operator/QuantumCircuit), label (str)
-    
+def show_quantum_object(obj, label="", save_path=None):
     if label:
         print(f"\n--- {label} ---")
         
+    if type(obj).__name__ == 'QuantumCircuit' and save_path:
+        obj.draw("mpl").savefig(save_path)
+        print(f"[Visualized] Circuit saved to: {save_path}")
+
     if _can_render_latex():
         from IPython.display import display
-        # If it's a circuit, we try 'mpl', otherwise 'latex'
-        if hasattr(obj, 'draw'):
-            try:
-                # If it's a circuit, 'mpl' is preferred for diagrams
-                if type(obj).__name__ == 'QuantumCircuit':
-                    display(obj.draw("mpl"))
-                else:
-                    display(obj.draw("latex"))
-            except Exception:
-                # Fallback if mpl/pylatexenc is missing in the venv
-                display(obj.draw("text"))
+        try:
+            display(obj.draw("mpl") if type(obj).__name__ == 'QuantumCircuit' else obj.draw("latex"))
+        except:
+            display(obj.draw("text"))
     else:
-        # Fallback to ASCII for Firebase Studio terminal
-        print(obj.draw("text"))
+        print(obj.draw("text") if hasattr(obj, 'draw') else str(obj))
 
-def show_circuit(qc, label=""):
-    # Wrapper specifically for QuantumCircuits
-    show_quantum_object(qc, label)
+def show_bloch_comparison(states, labels=None, save_path=None):
+    """
+    Renders Bloch Spheres for state comparison.
+    Tensors individual 1-qubit states into a multi-qubit object for side-by-side plotting.
+    """
+    # Tensor target_rho ^ bob_rho to create a 2-qubit system (4x4 matrix)
+    combined_state = states[0]
+    for i in range(1, len(states)):
+        combined_state = combined_state.tensor(states[i])
+
+    fig = plot_bloch_multivector(combined_state, title="State Comparison")
+    
+    # Optional annotation for Alice/Bob
+    if labels and len(labels) >= 2:
+        fig.text(0.25, 0.1, labels[1], ha='center', fontsize=10) # Bob (Left)
+        fig.text(0.75, 0.1, labels[0], ha='center', fontsize=10) # Alice (Right)
+
+    if _can_render_latex():
+        from IPython.display import display
+        display(fig)
+    
+    if save_path:
+        fig.savefig(save_path)
+        plt.close(fig)
+        print(f"[Visualized] Bloch Plot saved to: {save_path}")
+    elif not _can_render_latex():
+        print("\n[INFO] Bloch Sphere skipped (Terminal Mode & No save_path).")
+
+def show_circuit(qc, label="", save_path=None):
+    show_quantum_object(qc, label, save_path=save_path)
 
 def show_state(state, label=""):
     show_quantum_object(state, label)
-
-def show_operator(op, label=""):
-    show_quantum_object(op, label)

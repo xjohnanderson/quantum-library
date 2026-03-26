@@ -1,13 +1,15 @@
 # scripts/teleportation_demo.py
+# Path: scripts/teleportation_demo.py
 # Function Constraints: Validates teleportation fidelity using Statevector post-selection.
-# This script prepares the state PRIOR to protocol logic to avoid overwriting entanglement.
 
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 import numpy as np
 import random
+
+# Append project root to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from qiskit import QuantumCircuit, QuantumRegister
 from qiskit.quantum_info import Statevector, DensityMatrix
 from qiskit.circuit.library import UGate
@@ -15,10 +17,14 @@ from qiskit.circuit.library import UGate
 from utils.constants import ALICE_SOURCE_INDEX, THETA_MAX, PHI_MAX, LAMBDA_MAX
 from algorithms.teleportation.logic import get_teleportation_circuit
 from analysis.fidelity import check_transfer_integrity
-from utils.visualization import show_state
+from utils.visualization import show_state, show_circuit, show_bloch_comparison
+from utils.io import prepare_output_dir
 
 def run_teleportation_demo():
-    print("=== QUANTUM TELEPORTATION: NUMERICAL PROOF ===")
+    print("=== QUANTUM TELEPORTATION: NUMERICAL & GEOMETRIC PROOF ===")
+    
+    # 0. Initialize Volatile Workspace & Get Script Prefix
+    out_dir, prefix = prepare_output_dir()
     
     # 1. Prepare a Random Target State (The "Message")
     theta = random.random() * THETA_MAX
@@ -30,33 +36,21 @@ def run_teleportation_demo():
     target_rho = DensityMatrix(target_sv)
     
     # 2. Sequential Circuit Construction
-    # Initialize 3-qubit register
     qr = QuantumRegister(3, name="q")
     qc = QuantumCircuit(qr)
-    
-    # FIRST: Prepare the message state on Alice's source qubit
-    # This must happen first so prepare_state doesn't reset existing gates.
     qc.prepare_state(target_sv, [ALICE_SOURCE_INDEX])
     qc.barrier()
     
-    # SECOND: Append the teleportation infrastructure (Simulation Mode)
-    # This builds the Bell pair and performs Alice's basis change.
     tele_logic = get_teleportation_circuit(simulation_mode=True)
     qc.compose(tele_logic, inplace=True)
     
     # 3. Mathematical Extraction (Simulating the '00' branch)
     sv = Statevector.from_instruction(qc)
-    
-    # Qiskit indexing for 3 qubits: |q2 (Bob) q1 (Alice-ebit) q0 (Alice-Source)>
-    # Indices 0 (|000>) and 4 (|100>) represent the state of Bob's qubit
-    # when the partial measurement of q1 and q0 yields '00'.
-    c0 = sv.data[0]
-    c4 = sv.data[4]
+    c0, c4 = sv.data[0], sv.data[4]
     
     branch_coeffs = np.array([c0, c4])
-    
-    # Re-normalize the extracted branch amplitudes
     norm = np.linalg.norm(branch_coeffs)
+    
     if norm == 0:
         print("[ERROR] Branch probability is zero. Verify circuit connectivity.")
         return
@@ -67,11 +61,28 @@ def run_teleportation_demo():
     # 4. Verification via Analysis Module
     fidelity, is_match = check_transfer_integrity(target_rho, bob_rho)
     
-    # 5. Output Results
+    # 5. Output Results & Visualization
     print(f"Input Rotation: θ={theta:.4f}, φ={phi:.4f}")
     print("-" * 40)
-    show_state(target_rho, "Alice's Input (Target)")
-    show_state(bob_rho, "Bob's Reconstructed State")
+    
+    # Define artifact paths using the dynamic prefix
+    c_path = os.path.join(out_dir, f"{prefix}_circuit.png")
+    b_path = os.path.join(out_dir, f"{prefix}_bloch_comparison.png")
+    
+    # Visualizing the Protocol Infrastructure
+    show_circuit(qc, "Teleportation Infrastructure", save_path=c_path)
+    
+    # Visualizing the Math
+    show_state(target_rho, "Alice's Input State (Density Matrix)")
+    show_state(bob_rho, "Bob's Reconstructed State (Density Matrix)")
+    
+    # Visualizing the Geometry (Bloch Comparison)
+    show_bloch_comparison(
+        [target_rho, bob_rho], 
+        labels=["Alice's Input", "Bob's Output"],
+        save_path=b_path
+    )
+    
     print("-" * 40)
     print(f"STATE FIDELITY: {fidelity * 100:.6f}%")
     
