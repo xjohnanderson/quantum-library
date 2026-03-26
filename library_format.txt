@@ -1,0 +1,17 @@
+Quantum Library Format: 
+
+Algorithms:
+/algorithms/algo-name/logic.py 
+- core algorithm logic example Deutsch Problem Logic 
+
+Factories:
+/factories/circuit_factory.py Reusable circuit components, gates, oracles, and circuit templates. 
+/factories/basis_factory.py Pure basis states and common statevectors. 
+/factories/state_factory.py Provides high-level methods to evolve basis states into specific oracle-transformed states 
+
+
+Analysis: 
+Utilities for verification ex: analysis/entanglement.py provides utilities for verifying quantum correlations and state purity. 
+
+Scripts:
+Contains demos ex: scripts/entanglement_comparison.py compares Z-basis (|00>) vs X-basis (|++>) entanglement prep

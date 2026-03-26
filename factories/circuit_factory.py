@@ -336,3 +336,46 @@ def get_deutsch_jozsa_circuit(n_qubits: int, case: str) -> QuantumCircuit:
     return qc
 
 """End Deutsch-Jousza"""
+
+
+
+"""Simon's Algorithm"""
+
+def create_simon_oracle(s: str) -> QuantumCircuit:
+    """
+    Creates the Simon oracle for secret string s.
+    Implements |x⟩|y⟩ → |x⟩|y ⊕ f(x)⟩ where f(x) = f(x ⊕ s) for all x.
+    
+    For n=3, f(x) = (x · s) mod 2  (linear function over GF(2))
+    """
+    n = len(s)
+    if n != 3:
+        raise ValueError("This implementation supports only 3-qubit Simon's (n=3)")
+    if not all(bit in '01' for bit in s):
+        raise ValueError("Secret string must consist only of '0' and '1'")
+
+    qc = QuantumCircuit(n + n, name=f"SimonOracle_s={s}")
+
+    # For each output qubit i, we compute y_i ← y_i ⊕ (x · s)_i
+    # Since it's the standard Simon promise, we can implement it as controlled-X
+    # from the input bits where s_j == '1' to each output bit (because f is linear)
+
+    s_bits = [int(bit) for bit in reversed(s)]  # Qiskit little-endian
+
+    for i in range(n):                      # for each output qubit y_i
+        controls = []
+        for j in range(n):
+            if s_bits[j] == 1:              # if this input bit is in the support of s
+                controls.append(j)          # control from input qubit j
+
+        if controls:
+            # Apply multi-controlled X (C...CX) from controls → output qubit (n + i)
+            if len(controls) == 1:
+                qc.cx(controls[0], n + i)
+            else:
+                qc.mcx(controls, n + i)     # multi-controlled X
+
+    return qc.to_gate()
+"""End Simon's Algorithm"""
+
+
