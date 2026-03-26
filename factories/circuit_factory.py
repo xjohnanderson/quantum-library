@@ -257,7 +257,6 @@ def get_bernstein_vazirani_oracle(s: str) -> QuantumCircuit:
 def get_bernstein_vazirani_circuit(s: str) -> QuantumCircuit:
      
     #Full Bernstein-Vazirani circuit for secret string s.
-    
     #Returns a circuit that should measure the secret string s with probability 1.
      
     n = len(s)
@@ -282,3 +281,58 @@ def get_bernstein_vazirani_circuit(s: str) -> QuantumCircuit:
     
     return qc
 """End Bernstein-Vazirani"""
+
+
+"""Deutsch-Jousza"""
+def get_dj_oracle(n_qubits: int, case: str) -> QuantumCircuit:
+    # Generates a Deutsch-Jozsa oracle.
+    # Inputs: n_qubits (int), case (str: 'constant_0', 'constant_1', or 'balanced')
+    # Outputs: dj_oracle (Gate)
+    
+    # We need n input qubits + 1 auxiliary qubit
+    qc = QuantumCircuit(n_qubits + 1, name=f"DJ_Oracle_{case}")
+
+    if case == 'constant_0':
+        pass # f(x) = 0, do nothing
+    elif case == 'constant_1':
+        qc.x(n_qubits) # f(x) = 1, flip auxiliary qubit
+    elif case == 'balanced':
+        # Simple balanced oracle: XOR sum of bits. 
+        # Flip auxiliary if an odd number of input bits are 1.
+        for i in range(n_qubits):
+            qc.cx(i, n_qubits)
+    else:
+        raise ValueError("Case must be 'constant_0', 'constant_1', or 'balanced'")
+
+    return qc.to_gate()
+
+def get_deutsch_jozsa_circuit(n_qubits: int, case: str) -> QuantumCircuit:
+    # Function Constraints: Constructs the full Deutsch-Jozsa circuit.
+    # Inputs: n_qubits (int), case (str)
+    # Outputs: dj_circuit (QuantumCircuit)
+    
+    # Register sizes: n input bits, 1 auxiliary bit, n classical bits for measurement
+    qc = QuantumCircuit(n_qubits + 1, n_qubits, name=f"DJ_{case}")
+
+    # 1. State Preparation
+    # Input qubits to |+>^n
+    qc.h(range(n_qubits))
+    # Auxiliary qubit to |->
+    qc.x(n_qubits)
+    qc.h(n_qubits)
+    qc.barrier()
+
+    # 2. Apply Oracle
+    oracle = get_dj_oracle(n_qubits, case)
+    qc.append(oracle, range(n_qubits + 1))
+    qc.barrier()
+
+    # 3. Interference: Apply H to input qubits
+    qc.h(range(n_qubits))
+
+    # 4. Measure
+    qc.measure(range(n_qubits), range(n_qubits))
+
+    return qc
+
+"""End Deutsch-Jousza"""
