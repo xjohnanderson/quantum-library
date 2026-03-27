@@ -2,8 +2,8 @@
 # Reusable circuit components, gates, oracles, and circuit templates.
 
 from qiskit import QuantumCircuit, QuantumRegister
-from qiskit.circuit.library import ZGate, QFT
-from qiskit.quantum_info import Operator
+from qiskit.circuit.library import ZGate, QFT, PauliEvolutionGate
+from qiskit.quantum_info import Operator, SparsePauliOp
 from utils.math_ops import get_mod_inv
 import numpy as np
 
