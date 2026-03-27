@@ -343,37 +343,41 @@ def get_deutsch_jozsa_circuit(n_qubits: int, case: str) -> QuantumCircuit:
 
 def create_simon_oracle(s: str) -> QuantumCircuit:
     """
-    Creates the Simon oracle for secret string s.
-    Implements |x⟩|y⟩ → |x⟩|y ⊕ f(x)⟩ where f(x) = f(x ⊕ s) for all x.
-    
-    For n=3, f(x) = (x · s) mod 2  (linear function over GF(2))
+    Creates a valid 2-to-1 Simon oracle where f(x) = f(x ⊕ s).
     """
     n = len(s)
-    if n != 3:
-        raise ValueError("This implementation supports only 3-qubit Simon's (n=3)")
-    if not all(bit in '01' for bit in s):
-        raise ValueError("Secret string must consist only of '0' and '1'")
-
     qc = QuantumCircuit(n + n, name=f"SimonOracle_s={s}")
+    
+    # Qiskit little-endian: s_bits[0] is the rightmost bit (LSB)
+    s_bits = [int(bit) for bit in reversed(s)]
+    
+    # Find the first index 'k' where s_k == 1 to act as the reference/shift bit
+    k = -1
+    for i, bit in enumerate(s_bits):
+        if bit == 1:
+            k = i
+            break
 
-    # For each output qubit i, we compute y_i ← y_i ⊕ (x · s)_i
-    # Since it's the standard Simon promise, we can implement it as controlled-X
-    # from the input bits where s_j == '1' to each output bit (because f is linear)
+    # If s is "000", the oracle is just a 1-to-1 identity mapping
+    if k == -1:
+        for i in range(n):
+            qc.cx(i, n + i)
+        return qc.to_gate()
 
-    s_bits = [int(bit) for bit in reversed(s)]  # Qiskit little-endian
-
-    for i in range(n):                      # for each output qubit y_i
-        controls = []
-        for j in range(n):
-            if s_bits[j] == 1:              # if this input bit is in the support of s
-                controls.append(j)          # control from input qubit j
-
-        if controls:
-            # Apply multi-controlled X (C...CX) from controls → output qubit (n + i)
-            if len(controls) == 1:
-                qc.cx(controls[0], n + i)
-            else:
-                qc.mcx(controls, n + i)     # multi-controlled X
+    # 2-to-1 Mapping Logic:
+    # We ensure that flipping the bits of s in the input results in the same output.
+    for i in range(n):
+        if s_bits[i] == 1:
+            if i != k:
+                # Output bit i becomes the XOR of input bit i and reference bit k
+                # f(x)_i = x_i ⊕ x_k
+                qc.cx(k, n + i)
+                qc.cx(i, n + i)
+            # If i == k, we leave the output bit n+k as |0>. 
+            # This ensures f(x) = f(x ⊕ s) because both inputs map to 0 at this index.
+        else:
+            # 1-to-1 mapping for bits where s_i == 0
+            qc.cx(i, n + i)
 
     return qc.to_gate()
 """End Simon's Algorithm"""
