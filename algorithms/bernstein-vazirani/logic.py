@@ -76,3 +76,35 @@ def demonstrate_phase_kickback(s: str = "101"):
     # Optional: show that the input register acquired phases corresponding to s
     print("Post-oracle state (input register phases encode the secret):")
     print(post_state)
+
+
+
+    """Bernstein-Vazirani"""
+
+def get_bernstein_vazirani_circuit(s: str) -> QuantumCircuit:
+     
+    #Full Bernstein-Vazirani circuit for secret string s.
+    #Returns a circuit that should measure the secret string s with probability 1.
+     
+    n = len(s)
+    qc = QuantumCircuit(n + 1, n, name=f"BernsteinVazirani_s={s}")
+    
+    # 1. Initialize input register to |+...+⟩ and auxiliary to |-> 
+    qc.h(range(n))           # superposition on input qubits
+    qc.x(n)                  # auxiliary to |1⟩
+    qc.h(n)                  # auxiliary to |-> 
+    qc.barrier()
+    
+    # 2. Apply the oracle
+    oracle = get_bernstein_vazirani_oracle(s)
+    qc.append(oracle, range(n + 1))
+    qc.barrier()
+    
+    # 3. Apply Hadamard again on input register (Fourier transform back)
+    qc.h(range(n))
+    
+    # 4. Measure input register (auxiliary qubit is not measured)
+    qc.measure(range(n), range(n))
+    
+    return qc
+"""End Bernstein-Vazirani"""

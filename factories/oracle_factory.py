@@ -2,6 +2,8 @@
 
 from qiskit import QuantumCircuit, QuantumRegister
 from qiskit.circuit.library import ZGate
+from qiskit.quantum_info import Operator
+import numpy as np
 
 """Oracles"""
 def get_bit_flip_oracle(case: str):
@@ -48,3 +50,134 @@ def get_phase_flip_oracle(n_qubits: int, target_state: str):
             qc.x(i)
     return qc.to_gate()
 """End Oracles"""
+
+"""Bernstein-Vazirani"""
+def get_bernstein_vazirani_oracle(s: str) -> QuantumCircuit:
+   
+    #Creates the Bernstein-Vazirani oracle for a secret string s.
+    
+    #The oracle implements |x⟩|y⟩ → |x⟩|y ⊕ (s·x)⟩ where s·x is the dot product mod 2.
+    
+    n = len(s)
+    if not all(bit in '01' for bit in s):
+        raise ValueError("Secret string s must consist of '0's and '1's only.")
+    
+    qc = QuantumCircuit(n + 1, name=f"BV_oracle_s={s}")
+    
+    # Apply CNOT from each input qubit i to the target if s[i] == '1'
+    for i, bit in enumerate(reversed(s)):   # reversed because Qiskit uses little-endian
+        if bit == '1':
+            qc.cx(i, n)                     # control = input qubit i, target = auxiliary
+    
+    return qc.to_gate()
+"""End Bernstein-Vazirani"""
+
+
+"""Deutsch-Jousza"""
+def get_dj_oracle(n_qubits: int, case: str) -> QuantumCircuit:
+    # Generates a Deutsch-Jozsa oracle.
+    # Inputs: n_qubits (int), case (str: 'constant_0', 'constant_1', or 'balanced')
+    # Outputs: dj_oracle (Gate)
+    
+    # We need n input qubits + 1 auxiliary qubit
+    qc = QuantumCircuit(n_qubits + 1, name=f"DJ_Oracle_{case}")
+
+    if case == 'constant_0':
+        pass # f(x) = 0, do nothing
+    elif case == 'constant_1':
+        qc.x(n_qubits) # f(x) = 1, flip auxiliary qubit
+    elif case == 'balanced':
+        # Simple balanced oracle: XOR sum of bits. 
+        # Flip auxiliary if an odd number of input bits are 1.
+        for i in range(n_qubits):
+            qc.cx(i, n_qubits)
+    else:
+        raise ValueError("Case must be 'constant_0', 'constant_1', or 'balanced'")
+
+    return qc.to_gate()
+
+
+"""End Deutsch-Jousza"""
+
+
+"""Simon's Algorithm"""
+
+def create_simon_oracle(s: str) -> QuantumCircuit:
+    """
+    Creates a valid 2-to-1 Simon oracle where f(x) = f(x ⊕ s).
+    """
+    n = len(s)
+    qc = QuantumCircuit(n + n, name=f"SimonOracle_s={s}")
+    
+    # Qiskit little-endian: s_bits[0] is the rightmost bit (LSB)
+    s_bits = [int(bit) for bit in reversed(s)]
+    
+    # Find the first index 'k' where s_k == 1 to act as the reference/shift bit
+    k = -1
+    for i, bit in enumerate(s_bits):
+        if bit == 1:
+            k = i
+            break
+
+    # If s is "000", the oracle is just a 1-to-1 identity mapping
+    if k == -1:
+        for i in range(n):
+            qc.cx(i, n + i)
+        return qc.to_gate()
+
+    # 2-to-1 Mapping Logic:
+    # We ensure that flipping the bits of s in the input results in the same output.
+    for i in range(n):
+        if s_bits[i] == 1:
+            if i != k:
+                # Output bit i becomes the XOR of input bit i and reference bit k
+                # f(x)_i = x_i ⊕ x_k
+                qc.cx(k, n + i)
+                qc.cx(i, n + i)
+            # If i == k, we leave the output bit n+k as |0>. 
+            # This ensures f(x) = f(x ⊕ s) because both inputs map to 0 at this index.
+        else:
+            # 1-to-1 mapping for bits where s_i == 0
+            qc.cx(i, n + i)
+
+    return qc.to_gate()
+"""End Simon's Algorithm"""
+
+
+"""Custom Gates"""
+def get_rfa_gate():
+    # Function Constraints: Defines a Reversible Full Adder (RFA).
+    # Inputs: None
+    # Outputs: rfa_gate (Gate)
+    
+    qa = QuantumRegister(1, 'A')
+    qb = QuantumRegister(1, 'B')
+    qcin = QuantumRegister(1, 'Cin')
+    qs = QuantumRegister(1, 'S')
+    qcout = QuantumRegister(1, 'Cout')
+    
+    qc = QuantumCircuit(qa, qb, qcin, qs, qcout, name='RFA')
+    
+    # Logic: S = A ^ B ^ Cin | Cout = (A & B) | (Cin & (A ^ B))
+    qc.cx(0, 3)     # A to Sum
+    qc.cx(1, 3)     # B to Sum
+    qc.ccx(0, 1, 4) # A & B to Cout
+    qc.ccx(2, 3, 4) # Cin & Sum_intermediate to Cout
+    qc.cx(2, 3)     # Final Sum
+    
+    return qc.to_gate(label='RFA')
+
+
+def get_modular_multiplier_gate(a, N):
+    # Function Constraints: Implements the unitary permutation |x> -> |a*x mod N>.
+    n_bits = int(np.ceil(np.log2(N)))
+    U = np.zeros((2**n_bits, 2**n_bits))
+    
+    for x in range(2**n_bits):
+        if x < N:
+            U[(a * x) % N, x] = 1
+        else:
+            U[x, x] = 1 
+            
+    return Operator(U)
+"""End Custom Gates"""

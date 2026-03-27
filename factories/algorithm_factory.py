@@ -57,26 +57,6 @@ def get_qft_circuit(n_qubits: int, do_swaps: bool = True) -> QuantumCircuit:
 
 
 """Bernstein-Vazirani"""
-def get_bernstein_vazirani_oracle(s: str) -> QuantumCircuit:
-   
-    #Creates the Bernstein-Vazirani oracle for a secret string s.
-    
-    #The oracle implements |x⟩|y⟩ → |x⟩|y ⊕ (s·x)⟩ where s·x is the dot product mod 2.
-    
-    n = len(s)
-    if not all(bit in '01' for bit in s):
-        raise ValueError("Secret string s must consist of '0's and '1's only.")
-    
-    qc = QuantumCircuit(n + 1, name=f"BV_oracle_s={s}")
-    
-    # Apply CNOT from each input qubit i to the target if s[i] == '1'
-    for i, bit in enumerate(reversed(s)):   # reversed because Qiskit uses little-endian
-        if bit == '1':
-            qc.cx(i, n)                     # control = input qubit i, target = auxiliary
-    
-    return qc.to_gate()
-
-
 
 def get_bernstein_vazirani_circuit(s: str) -> QuantumCircuit:
      
@@ -108,27 +88,6 @@ def get_bernstein_vazirani_circuit(s: str) -> QuantumCircuit:
 
 
 """Deutsch-Jousza"""
-def get_dj_oracle(n_qubits: int, case: str) -> QuantumCircuit:
-    # Generates a Deutsch-Jozsa oracle.
-    # Inputs: n_qubits (int), case (str: 'constant_0', 'constant_1', or 'balanced')
-    # Outputs: dj_oracle (Gate)
-    
-    # We need n input qubits + 1 auxiliary qubit
-    qc = QuantumCircuit(n_qubits + 1, name=f"DJ_Oracle_{case}")
-
-    if case == 'constant_0':
-        pass # f(x) = 0, do nothing
-    elif case == 'constant_1':
-        qc.x(n_qubits) # f(x) = 1, flip auxiliary qubit
-    elif case == 'balanced':
-        # Simple balanced oracle: XOR sum of bits. 
-        # Flip auxiliary if an odd number of input bits are 1.
-        for i in range(n_qubits):
-            qc.cx(i, n_qubits)
-    else:
-        raise ValueError("Case must be 'constant_0', 'constant_1', or 'balanced'")
-
-    return qc.to_gate()
 
 def get_deutsch_jozsa_circuit(n_qubits: int, case: str) -> QuantumCircuit:
     # Function Constraints: Constructs the full Deutsch-Jozsa circuit.
@@ -160,3 +119,30 @@ def get_deutsch_jozsa_circuit(n_qubits: int, case: str) -> QuantumCircuit:
     return qc
 
 """End Deutsch-Jousza"""
+
+
+"""CHSH Game"""
+def get_chsh_circuit(x: int, y: int) -> QuantumCircuit:
+    # Constructs a 2-qubit CHSH circuit for measurement settings (x, y)
+
+    if x not in (0, 1) or y not in (0, 1):
+        raise ValueError("x and y must be 0 or 1.")
+    
+    qc = QuantumCircuit(2, 2, name=f"CHSH_x{x}_y{y}")
+    
+    # 1. Prepare Shared Entanglement (Phi+)
+    attach_bell_state_prep(qc, 0, 1)
+    qc.barrier()
+    
+    # 2. Alice's Basis Rotation (x=0: Z-basis, x=1: X-basis)
+    if x == 1:
+        qc.ry(-np.pi / 2, 0)
+        
+    # 3. Bob's Basis Rotation (y=0: W1, y=1: W2)
+    # Angles are pi/8 and -pi/8 relative to Alice's bases.
+    theta_b = -np.pi / 4 if y == 0 else np.pi / 4
+    qc.ry(theta_b, 1)
+        
+    qc.measure([0, 1], [0, 1])
+    return qc
+"""End CHSH Game"""
