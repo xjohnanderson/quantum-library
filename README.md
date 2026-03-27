@@ -5,6 +5,7 @@
 #Setup in Firebase Studio
 nix-shell -p openssh git --run bash
 python -m venv .venv
+source .venv/bin/activate
 pip install --upgrade pip
 pip install qiskit qiskit-aer matplotlib pylatexenc pandas networkx numpy
    
