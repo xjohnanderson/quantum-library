@@ -8,20 +8,7 @@ from utils.math_ops import get_mod_inv
 import numpy as np
 
 
-""" State Prep """
-def get_x_basis_prep_circuit(state_symbols):
-    # Function Constraints: Returns a circuit to prepare a multi-qubit X-basis state.
-    # Inputs: state_symbols (str e.g., "+-")
-    # Outputs: QuantumCircuit
-    n = len(state_symbols)
-    qc = QuantumCircuit(n, name=f"Prep_{state_symbols}")
-    
-    for i, symbol in enumerate(reversed(state_symbols)):
-        if symbol == '-':
-            qc.x(i)
-        qc.h(i)
-    return qc
-""" End State Prep """
+
 
 
 """Operator Utilities """

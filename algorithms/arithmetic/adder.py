@@ -1,11 +1,10 @@
 # algorithms/arithmetic/adder.py
-# path_to_file: algorithms/arithmetic/adder.py
 # Function Constraints: Implements a Ripple Carry Adder using RFA gates.
 # Inputs: n (int) - bit width.
 # Outputs: qc (QuantumCircuit) - ~4n+2 logical qubits, high T-depth.
 
-from qiskit import QuantumCircuit, QuantumRegister
-from factories import get_rfa_gate
+ from qiskit import QuantumCircuit, QuantumRegister
+from factories.primitive_factory import get_rfa_gate 
 
 def n_bit_adder(n_bits):
     # Function Constraints: Constructs an N-bit ripple-carry adder with uncomputation.

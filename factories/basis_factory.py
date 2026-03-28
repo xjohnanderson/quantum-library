@@ -42,6 +42,11 @@ def get_bell_basis():
         'psi-': (z['01'] - z['10']) / np.sqrt(2)
     }
 
+
+def get_3qubit_z_basis():
+    """Computational (Z) basis for 3 qubits"""
+    return {f"{i:03b}": Statevector.from_label(f"{i:03b}") for i in range(8)}
+
 def get_ghz_basis() -> dict[str, Statevector]:
     """
     Returns the 3-qubit GHZ basis (also known as the GHZ-type entangled basis).
@@ -66,9 +71,7 @@ def get_ghz_basis() -> dict[str, Statevector]:
     }
 
 
-def get_3qubit_z_basis():
-    """Computational (Z) basis for 3 qubits"""
-    return {f"{i:03b}": Statevector.from_label(f"{i:03b}") for i in range(8)}
+
 
 
 

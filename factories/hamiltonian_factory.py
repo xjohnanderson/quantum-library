@@ -1,3 +1,7 @@
+# factories/hamiltonian_factory.py
+# QUBO → SparsePauliOp and time-evolution utilities.
+
+
 from qiskit.quantum_info import SparsePauliOp
 from qiskit.circuit.library import PauliEvolutionGate
 
