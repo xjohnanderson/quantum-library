@@ -7,19 +7,6 @@ from qiskit.quantum_info import Operator, SparsePauliOp
 from utils.math_ops import get_mod_inv
 import numpy as np
 
-"""Bell Protocol Helpers """
-def attach_bell_state_prep(qc, q0, q1):
-    # Appends H and CX to create a Phi+ |Φ+⟩ Bell state.
-    qc.h(q0)
-    qc.cx(q0, q1)
-    return qc
-
-def attach_bell_measurement(qc, q_control, q_target):
-    # Appends CX + H for Bell-basis measurement
-    qc.cx(q_control, q_target)
-    qc.h(q_control)
-    return qc
-"""End Bell Protocol Helpers """
 
 
 

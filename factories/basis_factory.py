@@ -72,25 +72,6 @@ def get_3qubit_z_basis():
     """Computational (Z) basis for 3 qubits"""
     return {f"{i:03b}": Statevector.from_label(f"{i:03b}") for i in range(8)}
 
-def create_zero_state(qr):
-    """
-    Function Constraints: Returns a circuit to prepare a |0>^n state.
-    Inputs: qr (QuantumRegister)
-    Outputs: QuantumCircuit
-    """
-    qc = QuantumCircuit(qr)
-    # Qubits are |0> by default, so no gates needed.
-    return qc
-
-def create_plus_state(qr):
-    """
-    Function Constraints: Returns a circuit to prepare a |+>^n state.
-    Inputs: qr (QuantumRegister)
-    Outputs: QuantumCircuit
-    """
-    qc = QuantumCircuit(qr)
-    qc.h(qr)
-    return qc
 
 
 # Exported Constants

@@ -1,6 +1,7 @@
 # algorithms/bernstein_vazirani/logic.py
 
 from qiskit import QuantumCircuit
+from factories.oracle_factory import get_bernstein_vazirani_oracle 
 from factories.circuit_factory import get_bernstein_vazirani_circuit
 from factories.basis_factory import get_2qubit_z_basis   
 from analysis.kickback import verify_kickback, report_phase_diagnostics

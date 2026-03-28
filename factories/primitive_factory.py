@@ -5,6 +5,45 @@ from qiskit.quantum_info import Operator
 import numpy as np
 
 
+"""Custom Gates"""
+def get_rfa_gate():
+    # Function Constraints: Defines a Reversible Full Adder (RFA).
+    # Inputs: None
+    # Outputs: rfa_gate (Gate)
+    
+    qa = QuantumRegister(1, 'A')
+    qb = QuantumRegister(1, 'B')
+    qcin = QuantumRegister(1, 'Cin')
+    qs = QuantumRegister(1, 'S')
+    qcout = QuantumRegister(1, 'Cout')
+    
+    qc = QuantumCircuit(qa, qb, qcin, qs, qcout, name='RFA')
+    
+    # Logic: S = A ^ B ^ Cin | Cout = (A & B) | (Cin & (A ^ B))
+    qc.cx(0, 3)     # A to Sum
+    qc.cx(1, 3)     # B to Sum
+    qc.ccx(0, 1, 4) # A & B to Cout
+    qc.ccx(2, 3, 4) # Cin & Sum_intermediate to Cout
+    qc.cx(2, 3)     # Final Sum
+    
+    return qc.to_gate(label='RFA')
+
+
+def get_modular_multiplier_gate(a, N):
+    # Function Constraints: Implements the unitary permutation |x> -> |a*x mod N>.
+    n_bits = int(np.ceil(np.log2(N)))
+    U = np.zeros((2**n_bits, 2**n_bits))
+    
+    for x in range(2**n_bits):
+        if x < N:
+            U[(a * x) % N, x] = 1
+        else:
+            U[x, x] = 1 
+            
+    return Operator(U)
+"""End Custom Gates"""
+
+
 """Bell Protocol Helpers """
 def attach_bell_state_prep(qc: QuantumCircuit, q0: int, q1: int) -> QuantumCircuit:
     # Appends H and CX to create a Phi+ |Φ+⟩ Bell state.
@@ -55,3 +94,24 @@ def get_circuit_operator(circuit: QuantumCircuit) -> Operator:
     # Convert any circuit to its unitary Operator
     return Operator.from_circuit(circuit)
 """End Operator Utilities"""
+
+
+def create_zero_state(qr):
+    """
+    Function Constraints: Returns a circuit to prepare a |0>^n state.
+    Inputs: qr (QuantumRegister)
+    Outputs: QuantumCircuit
+    """
+    qc = QuantumCircuit(qr)
+    # Qubits are |0> by default, so no gates needed.
+    return qc
+
+def create_plus_state(qr):
+    """
+    Function Constraints: Returns a circuit to prepare a |+>^n state.
+    Inputs: qr (QuantumRegister)
+    Outputs: QuantumCircuit
+    """
+    qc = QuantumCircuit(qr)
+    qc.h(qr)
+    return qc
