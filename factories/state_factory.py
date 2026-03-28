@@ -72,7 +72,7 @@ def get_bv_oracle_statevector(s: str, input_label: str = None) -> Statevector:
     initial_sv = Statevector.from_instruction(qc)
     
     # Ensure get_bernstein_vazirani_oracle is imported or defined in this scope
-    from factories.circuit_factory import get_bernstein_vazirani_oracle
+    from factories.oracle_factory import get_bernstein_vazirani_oracle
     oracle = get_bernstein_vazirani_oracle(s)
     
     final_sv = initial_sv.evolve(oracle)

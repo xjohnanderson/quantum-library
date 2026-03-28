@@ -2,6 +2,7 @@
 # This script implements the Deutsch Algorithm template.
 
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
+from factories.oracle_factory import get_dj_oracle
 
 def create_deutsch_circuit(oracle_gate):
     # Function Constraints: Wraps an oracle to determine if it's constant or balanced.

@@ -4,8 +4,8 @@ Core logic for 3-qubit Simon's Algorithm.
 """
 
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
-from factories.circuit_factory import create_simon_oracle
-from factories.basis_factory import create_zero_state, create_plus_state
+from factories.oracle_factory import create_simon_oracle      
+from factories.primitive_factory import create_zero_state, create_plus_state  
 
 
 def simons_algorithm_3qubit(s: str = "110") -> QuantumCircuit:

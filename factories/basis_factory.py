@@ -3,8 +3,6 @@
 
 from qiskit.quantum_info import Statevector
 import numpy as np
-from qiskit import QuantumCircuit, QuantumRegister
-
 
 
 def get_w_state() -> Statevector:
