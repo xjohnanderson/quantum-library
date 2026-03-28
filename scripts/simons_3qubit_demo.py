@@ -3,12 +3,13 @@
 Demo script for 3-qubit Simon's Algorithm using the modular structure + custom visualization.
 """
 
+
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from algorithms.simons.logic import simons_algorithm_3qubit
-from factories.circuit_factory import create_simon_oracle
+from factories import create_simon_oracle           
 from utils.visualization import show_circuit, show_quantum_object
 from qiskit_aer import Aer
 from qiskit import transpile, QuantumCircuit

@@ -7,10 +7,9 @@ import os
 from qiskit import transpile
 from qiskit_aer import AerSimulator
 
-# Ensure the root is in the python path for modular imports
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from factories.circuit_factory import get_deutsch_jozsa_circuit
+from algorithms.deutsch.logic import get_deutsch_jozsa_circuit
 from analysis.dj_verification import verify_dj_result
 from utils.visualization import show_quantum_object
 

@@ -5,12 +5,12 @@
 import sys
 import os
 
-# Append project root to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from algorithms.arithmetic.adder import n_bit_adder
 from analysis.resources import get_resource_report, print_resource_table
-from utils.visualization import show_circuit  # <--- New Import
+from utils.visualization import show_circuit
+
 
 def run_scalability_study():
     reports = []

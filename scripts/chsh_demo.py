@@ -5,13 +5,11 @@ import sys
 import os
 import random
 
-# Append project root to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# Now we can import from the root packages
 from algorithms.chsh.logic import quantum_strategy
-# Assuming classical_strategy is defined in your algorithms directory
-from algorithms.chsh.classical import classical_strategy  
+from algorithms.chsh.classical import classical_strategy
+
 
 def run_chsh_experiment(strategy_func, num_games=1000):
     # Win condition: (a ⊕ b) == (x ∧ y)

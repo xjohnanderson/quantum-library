@@ -3,7 +3,7 @@
 # Inputs: n (int) - bit width.
 # Outputs: qc (QuantumCircuit) - ~4n+2 logical qubits, high T-depth.
 
- from qiskit import QuantumCircuit, QuantumRegister
+from qiskit import QuantumCircuit, QuantumRegister
 from factories.primitive_factory import get_rfa_gate 
 
 def n_bit_adder(n_bits):

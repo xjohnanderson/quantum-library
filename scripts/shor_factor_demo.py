@@ -1,16 +1,15 @@
-# scripts/shor_factor_demo.py 
-# Demo: Factoring 15 using modular components.
+# scripts/shor_factor_demo.py
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
- 
-
 import numpy as np
 from math import gcd
-from qiskit_aer import Aer, AerSimulator
+from qiskit_aer import AerSimulator
 from qiskit import transpile
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from algorithms.shors.logic import create_shor_circuit
-from factories.circuit_factory import get_modular_multiplier_gate
+from factories import get_modular_multiplier_gate   # now in primitives
 from utils.math_ops import get_period_from_phase
 
 def run_shor_factorization(N, a):

@@ -7,10 +7,8 @@ import os
 from qiskit.quantum_info import Statevector, Operator
 from qiskit.circuit.library import CXGate
 
-# 1. Append project root to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# 2. Centralized imports from the factories hub
 from factories import Z_BASIS, get_w_state, get_composite_operator
 from utils.visualization import show_state, show_operator
 from analysis.measurement import simulate_measurement

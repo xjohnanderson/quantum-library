@@ -1,13 +1,9 @@
 # scripts/teleportation_demo.py
-# Path: scripts/teleportation_demo.py
-# Function Constraints: Validates teleportation fidelity using Statevector post-selection.
-
 import sys
 import os
 import numpy as np
 import random
 
-# Append project root to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from qiskit import QuantumCircuit, QuantumRegister

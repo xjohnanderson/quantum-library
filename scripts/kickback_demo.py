@@ -1,6 +1,4 @@
 # scripts/kickback_demo.py
-# Demo: Scientific proof of Phase Kickback using Deutsch oracles.
-
 import sys
 import os
 

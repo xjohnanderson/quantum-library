@@ -1,12 +1,13 @@
+# scripts/grover_run.py
 import sys
 import os
 import numpy as np
 
-# Append project root to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from qiskit import QuantumCircuit
-from factories import get_phase_flip_oracle, get_diffuser
+from factories import get_phase_flip_oracle
+from algorithms.grover.logic import get_diffuser   
 from analysis.simulation import run_simulation, report_results
 from analysis.resources import get_resource_report, print_resource_table, estimate_physical_overhead
 

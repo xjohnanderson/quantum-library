@@ -62,3 +62,9 @@ def show_circuit(qc, label="", save_path=None):
 
 def show_state(state, label=""):
     show_quantum_object(state, label)
+
+def show_operator(op, label: str = "Operator"):
+    """Simple printer for operators (used by composite_demo and evolution_demo)."""
+    print(f"\n=== {label} ===")
+    print(op)
+    print(f"Shape: {op.data.shape}\n")

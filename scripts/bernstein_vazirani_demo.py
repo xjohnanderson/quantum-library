@@ -1,14 +1,18 @@
 # /scripts/bernstein_vazirani_demo.py
- 
+
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from qiskit_aer import AerSimulator
 from qiskit import QuantumCircuit
 from qiskit.quantum_info import Statevector
 
-# Import from your library
-from factories.circuit_factory import (
+ 
+from algorithms.bernstein_vazirani.logic import (
     get_bernstein_vazirani_circuit,
-    get_bernstein_vazirani_oracle
+    analyze_phase_kickback
 )
 from analysis.kickback import verify_kickback, report_phase_diagnostics
 

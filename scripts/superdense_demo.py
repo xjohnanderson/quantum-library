@@ -1,9 +1,8 @@
 # scripts/superdense_demo.py
-# Demo: Executing Superdense Coding and analyzing bit-transfer accuracy.
 
 import sys
 import os
-# Ensure the project root is in the python path
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from algorithms.superdense.logic import get_superdense_circuit

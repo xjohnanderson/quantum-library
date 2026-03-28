@@ -4,10 +4,8 @@
 import sys
 import os
 
-# 1. Append project root to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# 2. Corrected imports from the factories hub
 from factories import X_BASIS, Z_BASIS, attach_bell_state_prep
 from analysis.simulation import run_simulation, report_results
 from qiskit import QuantumCircuit

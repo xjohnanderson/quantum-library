@@ -4,7 +4,7 @@
 # Outputs: qc (QuantumCircuit)
 
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
-from factories.circuit_factory import get_iqft_circuit
+from factories import get_iqft_circuit
 
 def create_shor_circuit(n_count, n_target, modular_exp_gate):
     # Ensure we are working with a gate
