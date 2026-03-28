@@ -79,7 +79,7 @@ def demonstrate_phase_kickback(s: str = "101"):
 
 
 
-    """Bernstein-Vazirani"""
+ 
 
 def get_bernstein_vazirani_circuit(s: str) -> QuantumCircuit:
      
@@ -107,4 +107,4 @@ def get_bernstein_vazirani_circuit(s: str) -> QuantumCircuit:
     qc.measure(range(n), range(n))
     
     return qc
-"""End Bernstein-Vazirani"""
+ 
