@@ -1,110 +1,69 @@
-# algorithms/bernstein_vazirani/logic.py
-
 from qiskit import QuantumCircuit
-from factories.oracle_factory import get_bernstein_vazirani_oracle 
-from factories.basis_factory import get_2qubit_z_basis   
-from analysis.kickback import verify_kickback, report_phase_diagnostics
 from qiskit.quantum_info import Statevector
+from qiskit_aer import AerSimulator
 
+from factories.oracle_factory import get_bernstein_vazirani_oracle 
+from analysis.kickback import verify_kickback, report_phase_diagnostics
+from utils.visualization import show_state
 
-def analyze_phase_kickback(secret: str = "101"):
-    """Demonstrate phase kickback using your kickback analysis module."""
-    print(f"\n=== Phase Kickback Analysis for s = '{secret}' ===")
+def get_bernstein_vazirani_circuit(s: str, include_measurement: bool = True) -> QuantumCircuit:
+    """Constructs the BV circuit. Set include_measurement=False for statevector analysis."""
+    n = len(s)
+    qc = QuantumCircuit(n + 1, n if include_measurement else 0, name=f"BV_{s}")
     
-    n = len(secret)
+    # 1. State Prep: |+...+> |->
+    qc.h(range(n))
+    qc.x(n)
+    qc.h(n)
+    qc.barrier()
     
-    # Prepare initial state: |+...+⟩ |-> 
-    qc_init = QuantumCircuit(n + 1)
-    qc_init.h(range(n))      # input register in superposition
-    qc_init.x(n)             # auxiliary to |1>
-    qc_init.h(n)             # auxiliary to |-> 
-    pre_state = Statevector.from_instruction(qc_init)
+    # 2. Oracle Application
+    oracle = get_bernstein_vazirani_oracle(s)
+    qc.compose(oracle, range(n + 1), inplace=True)
     
-    # Apply oracle
-    oracle = get_bernstein_vazirani_oracle(secret)
+    # ←←← THIS IS THE KEY FIX
+    qc = qc.decompose()          # expands the custom oracle gate into CX gates
+    
+    qc.barrier()
+    
+    if include_measurement:
+        qc.h(range(n))
+        qc.measure(range(n), range(n))
+    
+    return qc
+
+def analyze_phase_kickback(s: str = "101"):
+    """Isolates the oracle's effect on the statevector to verify kickback."""
+    n = len(s)
+    
+    # Pre-oracle state: H^n |0> \otimes H|1>
+    qc_pre = QuantumCircuit(n + 1)
+    qc_pre.h(range(n))
+    qc_pre.x(n)
+    qc_pre.h(n)
+    pre_state = Statevector.from_instruction(qc_pre)
+    
+    # Evolve through oracle
+    oracle = get_bernstein_vazirani_oracle(s)
     post_state = pre_state.evolve(oracle)
     
-    # Use your existing analysis tool
+    # Analysis
     kickback_detected, global_phase = verify_kickback(pre_state, post_state)
     report_phase_diagnostics(kickback_detected, global_phase)
     
     if n <= 4:
-        print("\nPost-oracle statevector (phases on input register encode the secret):")
-        print(post_state)
+        show_state(post_state, label=f"Post-oracle Statevector (s = {s})")
+
+
 
 def run_bernstein_vazirani(s: str, simulator=None):
-    """Run Bernstein-Vazirani for secret string s."""
-    if simulator is None:
-        from qiskit_aer import AerSimulator
-        simulator = AerSimulator()
-    
+    """Executes the full algorithm and returns measurement counts."""
+    sim = simulator or AerSimulator()
     qc = get_bernstein_vazirani_circuit(s)
     
-    result = simulator.run(qc, shots=1024).result()
+    result = sim.run(qc, shots=1024).result()
     counts = result.get_counts()
-    
-    # The most probable (ideally only) outcome should be the secret string
     measured = max(counts, key=counts.get)
     
-    print(f"Secret string:         {s}")
-    print(f"Measured string:       {measured}")
-    print(f"Success:               {measured == s}")
-    print(f"Counts:                {counts}")
-    
+    print(f"Secret: {s} | Measured: {measured} | Match: {measured == s}")
     return qc, counts
-
-
-def demonstrate_phase_kickback(s: str = "101"):
-    """Show phase kickback effect in Bernstein-Vazirani."""
-    print(f"\n=== Phase Kickback Demo for s = {s} ===\n")
-    
-    n = len(s)
-    # Initial state before oracle: |+...+⟩|-> 
-    qc_init = QuantumCircuit(n + 1)
-    qc_init.h(range(n))
-    qc_init.x(n)
-    qc_init.h(n)
-    pre_state = Statevector.from_instruction(qc_init)
-    
-    # After oracle
-    oracle = get_bernstein_vazirani_oracle(s)
-    post_state = pre_state.evolve(oracle)
-    
-    kickback_detected, global_phase = verify_kickback(pre_state, post_state)
-    report_phase_diagnostics(kickback_detected, global_phase)
-    
-    # Optional: show that the input register acquired phases corresponding to s
-    print("Post-oracle state (input register phases encode the secret):")
-    print(post_state)
-
-
-
- 
-
-def get_bernstein_vazirani_circuit(s: str) -> QuantumCircuit:
-     
-    #Full Bernstein-Vazirani circuit for secret string s.
-    #Returns a circuit that should measure the secret string s with probability 1.
-     
-    n = len(s)
-    qc = QuantumCircuit(n + 1, n, name=f"BernsteinVazirani_s={s}")
-    
-    # 1. Initialize input register to |+...+⟩ and auxiliary to |-> 
-    qc.h(range(n))           # superposition on input qubits
-    qc.x(n)                  # auxiliary to |1⟩
-    qc.h(n)                  # auxiliary to |-> 
-    qc.barrier()
-    
-    # 2. Apply the oracle
-    oracle = get_bernstein_vazirani_oracle(s)
-    qc.append(oracle, range(n + 1))
-    qc.barrier()
-    
-    # 3. Apply Hadamard again on input register (Fourier transform back)
-    qc.h(range(n))
-    
-    # 4. Measure input register (auxiliary qubit is not measured)
-    qc.measure(range(n), range(n))
-    
-    return qc
- 

@@ -15,7 +15,7 @@ from algorithms.bernstein_vazirani.logic import (
     analyze_phase_kickback
 )
 from analysis.kickback import verify_kickback, report_phase_diagnostics
-
+from utils.visualization import show_circuit
 
 def run_bv_demo(secret: str = "101", shots: int = 2048):
     """Run the full Bernstein-Vazirani circuit and show results."""
@@ -25,6 +25,7 @@ def run_bv_demo(secret: str = "101", shots: int = 2048):
 
     # Build circuit
     qc = get_bernstein_vazirani_circuit(secret)
+    show_circuit(qc, label=f"Bernstein-Vazirani Circuit (secret = {secret})")
     
     # Run on simulator
     simulator = AerSimulator()
