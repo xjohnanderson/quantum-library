@@ -1,0 +1,18 @@
+Quantum Library Format: 
+
+Algorithms:
+/algorithms/algo-name/logic.py 
+- core algorithm logic example Deutsch Problem Logic 
+
+Factories:
+factories/__init__.py
+
+Analysis: 
+Utilities for verification ex: analysis/entanglement.py provides utilities for verifying quantum correlations and state purity. 
+
+Utils:
+
+
+
+Scripts:
+Contains demos ex: scripts/entanglement_comparison.py compares Z-basis (|00>) vs X-basis (|++>) entanglement prep
