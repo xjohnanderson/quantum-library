@@ -1,7 +1,11 @@
 #Setup in Firebase Studio
-nix-shell -p openssh git --run bash
+nix-shell
 unset PROMPT_COMMAND
 python -m venv .venv
 source .venv/bin/activate
 pip install qiskit qiskit-aer qiskit_algorithms qiskit_nature matplotlib pylatexenc pandas networkx numpy pyscf
-   
+
+# Running Tests
+# Ensure you are in the nix-shell environment to have necessary shared libraries (libstdc++)
+# and that the virtual environment is activated.
+nix-shell --run "./.venv/bin/python -m unittest discover"

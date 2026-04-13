@@ -1,26 +1,27 @@
-{ pkgs ? import <nixpkgs> { config.allowBroken = true; } }:
+{ pkgs ? import <nixpkgs> {} }:
 
 pkgs.mkShell {
-  buildInputs = with pkgs; [
-    python311
-    python311Packages.pip
-    python311Packages.virtualenv
-    stdenv.cc.cc.lib
-    zlib
-    libgcc
+  buildInputs = [
+    pkgs.gcc
+    pkgs.python3
+    pkgs.git
+    pkgs.openssh
+    # Add Node.js here to provide the engine for the Gemini agent
+    pkgs.nodejs_20
   ];
 
   shellHook = ''
-    # This is the magic sauce for pip-installed numpy/qiskit
-    export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib pkgs.zlib pkgs.libgcc ]}:$LD_LIBRARY_PATH"
-    
-    echo "🚀 Qiskit Hybrid Environment Loaded"
-    
-    if [ -d ".venv" ]; then
-      source .venv/bin/activate
-      echo "✅ Virtual environment activated"
-    else
-      echo "💡 Run 'python -m venv .venv && source .venv/bin/activate && pip install qiskit qiskit-aer' to start."
-    fi
+    # Existing library paths
+    export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc ]}"
+    export PYTHONPATH="$PYTHONPATH:$(pwd)"
+
+    # Alias to run the Gemini agent without needing it in the Nix registry
+    # The -y flag skips the 'Install package?' prompt
+    alias gemini="npx -y @google/gemini-cli@latest"
+
+    echo "-------------------------------------------------------"
+    echo "Environment Ready: gcc, python3, git, ssh, and nodejs"
+    echo "Type 'gemini' to launch the Gemini Agent"
+    echo "-------------------------------------------------------"
   '';
 }
