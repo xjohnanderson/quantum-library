@@ -8,11 +8,15 @@ def verify_dj_result(counts: dict, n_qubits: int):
     
     all_zeros_str = '0' * n_qubits
     
-    # Calculate probability of the all-zeros state
+    # Calculate total shots and zeros count first
     total_shots = sum(counts.values())
     zeros_count = counts.get(all_zeros_str, 0)
-    prob_zeros = zeros_count / total_shots
     
+    if total_shots == 0:
+        prob_zeros = 0.0
+    else:
+        prob_zeros = zeros_count / total_shots
+
     # Logical decision
     if prob_zeros > 0.9:  # Threshold for noise/sim robustness
         classification = "CONSTANT"

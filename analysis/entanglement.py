@@ -51,14 +51,28 @@ def helstrom_bound(
     Helstrom bound for optimal discrimination between two states.
     Returns (success_probability, error_probability).
     """
-    D = compute_trace_distance(state1, state2)
-
-    if abs(prior - 0.5) < 1e-10:
-        success = (1 + D) / 2
-        error = (1 - D) / 2
+    # Convert to DensityMatrix
+    if isinstance(state1, np.ndarray):
+        rho1 = DensityMatrix(state1) if state1.ndim == 2 else Statevector(state1)
     else:
-        success = prior * (1 + D) + (1 - prior) * (1 - D)
-        error = 1 - success
+        rho1 = state1
+    if isinstance(state2, np.ndarray):
+        rho2 = DensityMatrix(state2) if state2.ndim == 2 else Statevector(state2)
+    else:
+        rho2 = state2
+
+    if isinstance(rho1, Statevector):
+        rho1 = DensityMatrix(rho1)
+    if isinstance(rho2, Statevector):
+        rho2 = DensityMatrix(rho2)
+
+    # Generalized Helstrom bound: P_succ = 1/2 * (1 + ||prior*rho1 - (1-prior)*rho2||_1)
+    diff = prior * rho1.data - (1 - prior) * rho2.data
+    evals = np.linalg.eigvalsh(diff)
+    norm1 = np.sum(np.abs(evals))
+    
+    success = 0.5 * (1 + norm1)
+    error = 1 - success
 
     return float(success), float(error)
 

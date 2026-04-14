@@ -3,9 +3,10 @@ nix-shell
 unset PROMPT_COMMAND
 python -m venv .venv
 source .venv/bin/activate
-pip install qiskit qiskit-aer qiskit_algorithms qiskit_nature matplotlib pylatexenc pandas networkx numpy pyscf
+pip install qiskit qiskit-aer qiskit_algorithms qiskit_nature matplotlib pylatexenc pandas networkx numpy pyscf pytest
 
 # Running Tests
-# Ensure you are in the nix-shell environment to have necessary shared libraries (libstdc++)
-# and that the virtual environment is activated.
+ 
+
+run all tests
 nix-shell --run "./.venv/bin/python -m unittest discover"

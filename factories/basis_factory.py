@@ -57,7 +57,7 @@ def get_ghz_basis() -> dict[str, Statevector]:
         |GHZ''⟩ = (|001⟩ + |110⟩)/√2,
         |GHZ'''⟩ = (|001⟩ - |110⟩)/√2  (and cyclic permutations)
     """
-    z = get_3qubit_z_basis()          # we'll define this helper below
+    z = get_3qubit_z_basis()          
     
     return {
         'ghz+':  (z['000'] + z['111']) / np.sqrt(2),   # standard GHZ

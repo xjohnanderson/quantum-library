@@ -92,21 +92,7 @@ class TestOracleFactory(unittest.TestCase):
         # x=11 -> f(11)
         sv11 = Statevector.from_label('0011').evolve(qc)
         
-        # Check that outputs (qubits 2,3) are the same
-        # Qiskit sv ordering: |q3 q2 q1 q0>
-        # sv00 should be some |y> |00>
-        # sv11 should be same |y> |11>
-        
-        # Let's check a bit more simply:
-        # Extract output part? Or just compare the whole state but mask input?
-        # Actually, let's just check equality of the whole sv if we know what it should be.
-        # For s=11, creation logic:
-        # k=0 (first '1' from LSB)
-        # i=1: s[1]=1, i!=k -> qc.cx(0, 3), qc.cx(1, 3)
-        # i=0: i==k -> nothing on 2
-        
-        # x=00 -> q3 = 0^0 = 0. Output is |00>
-        # x=11 -> q3 = 1^1 = 0. Output is |00>
+      
         
         self.assertTrue(sv00.equiv(Statevector.from_label('0000')))
         self.assertTrue(sv11.equiv(Statevector.from_label('0011')))

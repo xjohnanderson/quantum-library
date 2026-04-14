@@ -67,6 +67,11 @@ def run_comparison():
     # ====================== CASE B: X-basis |++⟩ ======================
     qc_x = QuantumCircuit(2)
     qc_x.h([0, 1])                            # Prepare |++⟩
+    
+    # Correcting Case B: To get a Bell state from |++>, 
+    # we need to transform back to |00> (or a different sequence)
+    # since attach_bell_state_prep expects |00> input.
+    qc_x.h([0, 1])                            # Return to |00>
     attach_bell_state_prep(qc_x, 0, 1)        # Then apply standard Bell prep
 
     qc_x_meas = qc_x.copy()
